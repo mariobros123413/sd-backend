@@ -29,17 +29,17 @@ export class ImageSdController {
         this.eventEmitter.emit('imageReceived', body);
     }
 
-    // Agrega este método para crear el servidor express
-    onModuleInit() {
-        const expressApp = express();
-        expressApp.use(express.json());
-        expressApp.post('/image-sd/webhook', (req, res) => this.webhook(req.body));
+    // // Agrega este método para crear el servidor express
+    // onModuleInit() {
+    //     const expressApp = express();
+    //     expressApp.use(express.json());
+    //     expressApp.post('/image-sd/webhook', (req, res) => this.webhook(req.body));
 
-        const server = expressApp.listen(3000, () => {
-            console.log('Webhook listening on port 3001');
-        });
+    //     const server = expressApp.listen(3000, () => {
+    //         console.log('Webhook listening on port 3001');
+    //     });
 
-        // Puedes guardar el servidor express en el eventoEmitter para cerrarlo correctamente cuando sea necesario
-        this.eventEmitter.emit('expressServer', server);
-    }
+    //     // Puedes guardar el servidor express en el eventoEmitter para cerrarlo correctamente cuando sea necesario
+    //     this.eventEmitter.emit('expressServer', server);
+    // }
 }
