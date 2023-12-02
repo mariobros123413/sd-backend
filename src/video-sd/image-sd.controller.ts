@@ -1,8 +1,6 @@
 import { Controller, Post, Body, HttpServer, Sse, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ImageSdService } from './image-sd.service';
-import express from 'express';
-
 @Controller('image-sd')
 export class ImageSdController {
     constructor(

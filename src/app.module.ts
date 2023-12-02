@@ -6,9 +6,11 @@ import { TextElController } from './text-el/text-el.controller';
 import { TextElModule } from './text-el/text-el.module';
 import { DiscordModule } from './discord/discord.module';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
-  imports: [VideoSdModule, TextElModule, DiscordModule, ConfigModule.forRoot()],
+  imports: [VideoSdModule, TextElModule, DiscordModule, ConfigModule.forRoot(), EventEmitterModule.forRoot(),
+  ],
   controllers: [AppController, TextElController],
   providers: [AppService],
 })
