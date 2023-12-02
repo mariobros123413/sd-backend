@@ -19,13 +19,13 @@ export class ImageSdController {
     }
 
     // Nuevo endpoint para el webhook
-    @Post('/webhook')
-    async webhook(@Body() body: any): Promise<void> {
-        // Aquí puedes manejar la imagen que te envía Stable Diffusion
-        console.log('Imagen recibida:', body);
-        // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
-        this.eventEmitter.emit('imageReceived', body);
-    }
+    // @Post('/webhook')
+    // async webhook(@Body() body: any): Promise<void> {
+    //     // Aquí puedes manejar la imagen que te envía Stable Diffusion
+    //     console.log('Imagen recibida:', body);
+    //     // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
+    //     this.eventEmitter.emit('imageReceived', body);
+    // }
 
     // // Agrega este método para crear el servidor express
     // onModuleInit() {
