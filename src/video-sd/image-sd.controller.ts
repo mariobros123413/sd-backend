@@ -26,7 +26,7 @@ export class ImageSdController {
         // Aquí puedes manejar la imagen que te envía Stable Diffusion
         console.log('Imagen recibida:', body);
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
-        // this.eventEmitter.emit('imageReceived', body);
+        this.eventEmitter.emit('imageReceived', body);
     }
 
     // Agrega este método para crear el servidor express

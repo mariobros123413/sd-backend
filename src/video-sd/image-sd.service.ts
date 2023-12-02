@@ -38,7 +38,7 @@ export class ImageSdService {
       num_inference_steps: '30',
       seed: null,
       guidance_scale: 7.5,
-      webhook: null,
+      webhook: "https://sd-backend-production.up.railway.app/webhook",
       track_id: null,
     };
 
