@@ -9,4 +9,4 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
   providers: [ImageSdService, EventEmitter2],
   exports: [ImageSdService]
 })
-export class VideoSdModule { }
+export class ImageSdModule { }

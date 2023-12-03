@@ -11,6 +11,6 @@ async function bootstrap() {
     credentials: true,
   }));
   app.use(bodyParser.urlencoded({ extended: true }));
-  await app.listen(3001);
+  await app.listen(process.env.PORT || 3001);
 }
 bootstrap(); //asdasd

@@ -38,7 +38,7 @@ export class ImageSdService {
       num_inference_steps: '30',
       seed: null,
       guidance_scale: 7.5,
-      webhook: "https://sd-backend-production.up.railway.app/webhook",
+      webhook: "https://f5c1-179-59-173-194.ngrok-free.app/image-sd/webhook",
       track_id: null,
     };
 
@@ -48,7 +48,6 @@ export class ImageSdService {
           'Content-Type': 'application/json',
         },
       });
-      console.log(`response : ${JSON.stringify(response)}`);
       return "Imagen procesandose";
     } catch (error) {
       console.error('Error al procesar la solicitud:', error);
