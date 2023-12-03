@@ -24,20 +24,21 @@ export class ImageSdService {
 
 
   async genImage(body: any) {
-    const additionalPrompt = "ultra realistic close up portrait ((beautiful pale cyberpunk female with heavy black eyeliner)), blue eyes, shaved side haircut, hyper detail, cinematic lighting, magic neon, dark red city, Canon EOS R3, nikon, f/1.4, ISO 200, 1/160s, 8K, RAW, unedited, symmetrical balance, in-frame, 8K";
+    const additionalPrompt = "hyperrealistic, full body, detailed clothing, highly detailed, cinematic lighting, stunningly beautiful, intricate, sharp focus, f\/1. 8, 85mm, (centered image composition), (professionally color graded), ((bright soft diffused light)), volumetric fog, trending on instagram, trending on tumblr, HDR 4K, 8K";
 
     const apiUrl = 'https://stablediffusionapi.com/api/v4/dreambooth';
     const requestData = {
       key: "rosqbr4dkbnIdOwXNZEeHrXknYNwAZzRrsfjaICwKBDRxhhRuRmbbfZhwEeM",
       model_id: 'drood-disney-pixar',
       prompt: `${body.text} ${additionalPrompt}`,
-      negative_prompt: 'painting, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, deformed, ugly, blurry, bad anatomy, bad proportions, extra limbs, cloned face, skinny, glitchy, double torso, extra arms, extra hands, mangled fingers, missing lips, ugly face, distorted face, extra legs, anime',
+      negative_prompt: '(child:1.5), ((((underage)))), ((((child)))), (((kid))), (((preteen))), (teen:1.5) ugly, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, bad anatomy, watermark, signature, cut off, low contrast, underexposed, overexposed, bad art, beginner, amateur, distorted face, blurry, draft, grainy',
       width: '512',
       height: '512',
       samples: '1',
-      num_inference_steps: '30',
+      steps: 20,
       seed: null,
       guidance_scale: 7.5,
+      scheduler: "DDPMScheduler",
       webhook: "https://sd-backend-production.up.railway.app/image-sd/webhook",
       track_id: null,
     };
