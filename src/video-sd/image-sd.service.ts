@@ -28,7 +28,7 @@ export class ImageSdService {
 
     const apiUrl = 'https://stablediffusionapi.com/api/v4/dreambooth';
     const requestData = {
-      key: "WvIpRbPYpe3l3Pnhv0ZviJRcKZaRBGqxZKg51jA1T9Q8JtKk9y96ofPq7jAd",
+      key: "rosqbr4dkbnIdOwXNZEeHrXknYNwAZzRrsfjaICwKBDRxhhRuRmbbfZhwEeM",
       model_id: 'drood-disney-pixar',
       prompt: `${body.text} ${additionalPrompt}`,
       negative_prompt: 'painting, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, deformed, ugly, blurry, bad anatomy, bad proportions, extra limbs, cloned face, skinny, glitchy, double torso, extra arms, extra hands, mangled fingers, missing lips, ugly face, distorted face, extra legs, anime',
@@ -60,7 +60,7 @@ export class ImageSdService {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     var raw = JSON.stringify({
-      "key": "WvIpRbPYpe3l3Pnhv0ZviJRcKZaRBGqxZKg51jA1T9Q8JtKk9y96ofPq7jAd",
+      "key": "rosqbr4dkbnIdOwXNZEeHrXknYNwAZzRrsfjaICwKBDRxhhRuRmbbfZhwEeM",
       "request_id": `"${id}"`
     });
     var requestOptions = {
