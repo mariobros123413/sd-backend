@@ -1,8 +1,14 @@
-import { Controller, Post, Body, HttpServer, Sse, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Response, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ImageSdService } from './image-sd.service';
+interface Subscription {
+    event: string;
+    listener: Function;
+}
 @Controller('image-sd')
 export class ImageSdController {
+    private readonly subscriptions: any[] = []; // Almacena las suscripciones
+
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly imageSDservice: ImageSdService,
@@ -27,17 +33,51 @@ export class ImageSdController {
         this.eventEmitter.emit('imageReceived', body);
     }
 
-    // // Agrega este método para crear el servidor express
-    // onModuleInit() {
-    //     const expressApp = express();
-    //     expressApp.use(express.json());
-    //     expressApp.post('/image-sd/webhook', (req, res) => this.webhook(req.body));
+    // Endpoint para el cliente que quiere suscribirse a eventos SSE
+    @Get('/sse')
+    async sse(@Response() res: any): Promise<void> {
+        console.log("Conexión SSE establecida");
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
 
-    //     const server = expressApp.listen(3000, () => {
-    //         console.log('Webhook listening on port 3001');
-    //     });
+        // Manejar cierre de conexión
+        res.on('close', () => {
+            console.log("Conexión SSE cerrada");
+            // Desuscribir todos los eventos al cerrar la conexión
+            this.subscriptions.forEach(subscription => {
+                this.eventEmitter.removeListener(subscription.event, subscription.listener);
+            });
+        });
 
-    //     // Puedes guardar el servidor express en el eventoEmitter para cerrarlo correctamente cuando sea necesario
-    //     this.eventEmitter.emit('expressServer', server);
-    // }
+        // Suscribir al evento 'imageReceived' y enviar datos al cliente cuando ocurra
+        const onData = (data: any) => {
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        };
+
+        const subscription = this.eventEmitter.on('imageReceived', onData);
+
+        // Almacenar la suscripción para desuscribirse más tarde
+        this.subscriptions.push({
+            event: 'imageReceived',
+            listener: onData,
+        });
+
+        // Emitir un mensaje inicial
+        res.write(`data: Conexión SSE establecida\n\n`);
+
+        // Mantener la conexión abierta
+        const pingInterval = setInterval(() => {
+            res.write(`data: Ping\n\n`);
+        }, 10000);
+
+        // Limpiar intervalos y suscripciones cuando se cierre la conexión
+        res.on('close', () => {
+            console.log("Conexión SSE cerrada");
+            clearInterval(pingInterval);
+            this.subscriptions.forEach(subscription => {
+                this.eventEmitter.removeListener(subscription.event, subscription.listener);
+            });
+        });
+    }
 }
