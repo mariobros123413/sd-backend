@@ -91,8 +91,10 @@ export class ImageSdService {
     const projectId = 'idproject';
     const imageExtension = path.extname(imageUrl);
     const imageName = path.basename(imageUrl, imageExtension);
-    const relativePath = `videos/${userId}/${projectId}/${imageName}_zoomed.mp4`;
-    const outputVideoPath = path.join(__dirname, '..', '..', `src/${relativePath}`); // Usa __dirname
+    await fs.ensureDir(`videos/${userId}/${projectId}`);
+
+    const relativePath = `${userId}/${projectId}/${imageName}_zoomed.mp4`;
+    const outputVideoPath = path.join('videos', `${relativePath}`); // Usa __dirname
     // console.log(`path ${outputVideoPath}`);
 
     const zoomFactor = 1.5; // Factor de zoom máximo
@@ -119,7 +121,7 @@ export class ImageSdService {
       command.on('end', resolve).on('error', reject);
     });
 
-    return relativePath;
+    return `videos/${relativePath}`;
   }
 
 
@@ -129,9 +131,9 @@ export class ImageSdService {
     const imageName = `${userId}-${projectId}-${Date.now()}.png`;
 
     const imagePathRelative = `images/${userId}/${projectId}/${imageName}`;
-    const imagePathFull = `src/${imagePathRelative}`;
+    const imagePathFull = `${imagePathRelative}`;
 
-    await fs.ensureDir(`src/images/${userId}/${projectId}`);
+    await fs.ensureDir(`images/${userId}/${projectId}`);
 
     const response = await fetch(imageUrl);
     const imageBuffer = await response.buffer();

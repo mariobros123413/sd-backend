@@ -36,10 +36,6 @@ export class ImageSdController {
         const imagePath = await this.imageSDservice.saveImage(body.output[0]);
         const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, 4);
 
-        // Eliminar el segmento no válido de la URL
-        const relativeImagePath = imagePath.replace('src/', '');
-        const relativeVideoUrl = videoUrl.replace('src/', '');
-
         console.log('Video URL:', `${process.env.URL_BACKEND}/${videoUrl}`);
 
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades

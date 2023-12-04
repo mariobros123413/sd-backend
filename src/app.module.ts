@@ -13,11 +13,11 @@ import { join } from 'path'; // Importa la función 'join' de Node.js para traba
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'src','images'), // Ruta a tu carpeta 'public'
+      rootPath: join(__dirname, '..', 'images'), // Ruta a tu carpeta 'public'
       serveRoot: '/images', // Ruta base para servir los archivos estáticos
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'src','videos'), // Ruta a tu carpeta 'public'
+      rootPath: join(__dirname, '..', 'videos'), // Ruta a tu carpeta 'public'
       serveRoot: '/videos', // Ruta base para servir los archivos estáticos
     }),
     ImageSdModule,

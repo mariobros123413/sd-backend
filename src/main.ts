@@ -15,8 +15,8 @@ async function bootstrap() {
     credentials: true,
   }));
   app.use(bodyParser.urlencoded({ extended: true }));
-  app.use('/images', express.static(join(__dirname, '..', 'sr', 'images')));
-  app.use('/videos', express.static(join(__dirname, '..', 'sr', 'videos')));
+  app.use('/images', express.static(join(__dirname, '..', 'images')));
+  app.use('/videos', express.static(join(__dirname, '..', 'videos')));
 
   await app.listen(process.env.PORT || 3001);
 }
