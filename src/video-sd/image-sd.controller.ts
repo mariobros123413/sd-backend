@@ -8,6 +8,7 @@ interface Subscription {
 @Controller('image-sd')
 export class ImageSdController {
     private readonly subscriptions: any[] = []; // Almacena las suscripciones
+    private videoTime: number; // Variable para almacenar el tiempo del video
 
     constructor(
         private readonly eventEmitter: EventEmitter2,
@@ -17,6 +18,8 @@ export class ImageSdController {
     @Post()
     async createVideo(@Body() body: any): Promise<any> {
         try {
+            this.videoTime = body.videoTime; // Almacenar el tiempo del video
+            console.log(` video create time : ${body}`);
             const imageUrl = await this.imageSDservice.genImage(body);
             return 'Solicitud en proceso. Esperando la disponibilidad de la imagen...';
         } catch (error) {
@@ -28,9 +31,13 @@ export class ImageSdController {
     @Post('/webhook')
     async webhook(@Body() body: any): Promise<void> {
         // Aquí puedes manejar la imagen que te envía Stable Diffusion
-        console.log('Imagen recibida:', body);
+
+        const urls = body.output[0].replace(/[;:].*$/, '');
+        console.log('Imagen recibida:', body.output[0]);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(body.output[0],this.videoTime);
+        console.log('Video URL:', videoUrl);
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
-        this.eventEmitter.emit('imageReceived', body);
+        this.eventEmitter.emit('imageReceived', videoUrl);
     }
 
     // Endpoint para el cliente que quiere suscribirse a eventos SSE
@@ -52,7 +59,7 @@ export class ImageSdController {
 
         // Suscribir al evento 'imageReceived' y enviar datos al cliente cuando ocurra
         const onData = (data: any) => {
-            res.write(`data: ${JSON.stringify(data)}\n\n`);
+            res.write(`data: ${(data)}\n\n`);
         };
 
         const subscription = this.eventEmitter.on('imageReceived', onData);
@@ -67,14 +74,10 @@ export class ImageSdController {
         res.write(`data: Conexión SSE establecida\n\n`);
 
         // Mantener la conexión abierta
-        const pingInterval = setInterval(() => {
-            res.write(`data: Ping\n\n`);
-        }, 10000);
 
         // Limpiar intervalos y suscripciones cuando se cierre la conexión
         res.on('close', () => {
             console.log("Conexión SSE cerrada");
-            clearInterval(pingInterval);
             this.subscriptions.forEach(subscription => {
                 this.eventEmitter.removeListener(subscription.event, subscription.listener);
             });

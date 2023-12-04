@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import fetch from 'node-fetch';
 import axios from 'axios';
+import { exec } from 'child_process';
+import ffmpeg from 'fluent-ffmpeg';
+import * as ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import path from 'path';
 var request = require('request');
 @Injectable()
 export class ImageSdService {
@@ -80,4 +84,39 @@ export class ImageSdService {
     return response.data.output;
   }
 
+  async generateZoomVideo(imageUrl: string, zoomDuration: number): Promise<string> {
+    const outputVideoPath = path.join(__dirname, 'output_video.mp4');
+    console.log(`path ${outputVideoPath}`);
+
+    const zoomFactor = 1.5; // Factor de zoom máximo
+    const framesPerSecond = 30; // Ajusta según tu preferencia
+
+    const command = ffmpeg()
+      .setFfmpegPath(ffmpegInstaller.path)
+      .input(imageUrl)
+      .inputOptions(['-loop 1'])
+      .outputOptions([
+        '-c:v libx264',
+        '-vf', `zoompan=z='min(zoom+0.0015\\,${zoomFactor})':d=${zoomDuration * framesPerSecond}:fps=${framesPerSecond},scale=512:512,format=yuv420p`,
+        '-t', `${zoomDuration}`,
+        '-pix_fmt', 'yuv420p'
+      ])
+      .on('end', () => {
+        console.log('Generación de video completa');
+      })
+      .on('error', (err) => {
+        console.error('Error en la generación del video:', err);
+      })
+      .save(outputVideoPath);
+
+
+
+
+
+    await new Promise<void>((resolve, reject) => {
+      command.on('end', resolve).on('error', reject);
+    });
+
+    return `${outputVideoPath}`;
+  }
 }
