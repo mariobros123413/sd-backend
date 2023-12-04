@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
+import * as fs from 'fs-extra'; // Importa fs-extra
 import fetch from 'node-fetch';
 import axios from 'axios';
 import { exec } from 'child_process';
 import ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import path from 'path';
+
 var request = require('request');
 @Injectable()
 export class ImageSdService {
@@ -85,7 +86,17 @@ export class ImageSdService {
   }
 
   async generateZoomVideo(imageUrl: string, zoomDuration: number): Promise<string> {
-    const outputVideoPath = path.join(__dirname, 'output_video.mp4');
+    const userId = 'nickusuario'; // Obtén el ID del usuario de tu lógica de aplicación
+    const projectId = 'idproject'; // Obtén el ID del proyecto de tu lógica de aplicación
+    const imageExtension = path.extname(imageUrl);
+    console.log(`imaext :${imageExtension}`);
+    const imageName = path.basename(imageUrl, imageExtension);
+    console.log(`imageName :${imageName}`);
+
+    const projectRoot = process.cwd();
+    await fs.ensureDir(`src/videos/${userId}/${projectId}`);
+
+    const outputVideoPath = path.join(projectRoot, `src/videos/${userId}/${projectId}/${imageName}.mp4`);
     console.log(`path ${outputVideoPath}`);
 
     const zoomFactor = 1.5; // Factor de zoom máximo
@@ -97,8 +108,8 @@ export class ImageSdService {
       .inputOptions(['-loop 1'])
       .outputOptions([
         '-c:v libx264',
-        '-vf', `zoompan=z='min(zoom+0.0015\\,${zoomFactor})':d=${zoomDuration * framesPerSecond}:fps=${framesPerSecond},scale=512:512,format=yuv420p`,
-        '-t', `${zoomDuration}`,
+        '-vf', `zoompan=z='min(zoom+0.0015\\,${zoomFactor})':d=${3 * framesPerSecond}:fps=${framesPerSecond},scale=512:512,format=yuv420p`,
+        '-t', `3`,
         '-pix_fmt', 'yuv420p'
       ])
       .on('end', () => {
@@ -108,15 +119,25 @@ export class ImageSdService {
         console.error('Error en la generación del video:', err);
       })
       .save(outputVideoPath);
-
-
-
-
-
     await new Promise<void>((resolve, reject) => {
       command.on('end', resolve).on('error', reject);
     });
 
     return `${outputVideoPath}`;
+  }
+
+  async saveImage(imageUrl: string): Promise<string> {
+    const userId = 'nickusuario'; // Obtén el ID del usuario de tu lógica de aplicación
+    const projectId = 'idproject'; // Obtén el ID del proyecto de tu lógica de aplicación
+    const imageName = `${userId}-${projectId}-${Date.now()}.png`;
+    const imagePath = `src/images/${userId}/${projectId}/${imageName}`;
+
+    await fs.ensureDir(`src/images/${userId}/${projectId}`);
+
+    const response = await fetch(imageUrl);
+    const imageBuffer = await response.buffer();
+    await fs.writeFile(imagePath, imageBuffer);
+
+    return imagePath;
   }
 }

@@ -7,9 +7,20 @@ import { TextElModule } from './text-el/text-el.module';
 import { DiscordModule } from './discord/discord.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path'; // Importa la función 'join' de Node.js para trabajar con rutas
 
 @Module({
-  imports: [ImageSdModule,
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'src','images'), // Ruta a tu carpeta 'public'
+      serveRoot: '/images', // Ruta base para servir los archivos estáticos
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'src','videos'), // Ruta a tu carpeta 'public'
+      serveRoot: '/videos', // Ruta base para servir los archivos estáticos
+    }),
+    ImageSdModule,
     TextElModule,
     DiscordModule,
     ConfigModule.forRoot(),

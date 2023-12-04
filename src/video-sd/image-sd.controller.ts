@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Response, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ImageSdService } from './image-sd.service';
+
 interface Subscription {
     event: string;
     listener: Function;
@@ -20,6 +21,7 @@ export class ImageSdController {
         try {
             this.videoTime = body.videoTime; // Almacenar el tiempo del video
             console.log(` video create time : ${body}`);
+
             const imageUrl = await this.imageSDservice.genImage(body);
             return 'Solicitud en proceso. Esperando la disponibilidad de la imagen...';
         } catch (error) {
@@ -30,11 +32,9 @@ export class ImageSdController {
     // Nuevo endpoint para el webhook
     @Post('/webhook')
     async webhook(@Body() body: any): Promise<void> {
-        // Aquí puedes manejar la imagen que te envía Stable Diffusion
-
-        const urls = body.output[0].replace(/[;:].*$/, '');
         console.log('Imagen recibida:', body.output[0]);
-        const videoUrl = await this.imageSDservice.generateZoomVideo(body.output[0],this.videoTime);
+        const imagePath = await this.imageSDservice.saveImage( body.output[0]);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(imagePath, this.videoTime);
         console.log('Video URL:', videoUrl);
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
         this.eventEmitter.emit('imageReceived', videoUrl);
