@@ -86,17 +86,16 @@ export class ImageSdService {
   }
 
   async generateZoomVideo(imageUrl: string, zoomDuration: number): Promise<string> {
-    console.log(`url imagen : ${imageUrl}`)
     const userId = 'nickusuario';
     const projectId = 'idproject';
     const imageExtension = path.extname(imageUrl);
     const imageName = path.basename(imageUrl, imageExtension);
     const relativePath = `videos/${userId}/${projectId}/${imageName}_zoomed.mp4`;
-    const outputVideoPath = path.join(process.cwd(), `src/${relativePath}`);
+    const outputVideoPath = path.join(__dirname, '..', relativePath); // Usa __dirname
     console.log(`path ${outputVideoPath}`);
 
-    const zoomFactor = 1.5; // Factor de zoom máximo
-    const framesPerSecond = 30; // Ajusta según tu preferencia
+    const zoomFactor = 1.5;
+    const framesPerSecond = 30;
 
     const command = ffmpeg()
       .setFfmpegPath(ffmpegInstaller.path)
@@ -115,12 +114,14 @@ export class ImageSdService {
         console.error('Error en la generación del video:', err);
       })
       .save(outputVideoPath);
+
     await new Promise<void>((resolve, reject) => {
       command.on('end', resolve).on('error', reject);
     });
 
     return relativePath;
   }
+
 
 
   async saveImage(imageUrl: string): Promise<string> {
