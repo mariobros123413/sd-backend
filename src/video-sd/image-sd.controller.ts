@@ -34,7 +34,7 @@ export class ImageSdController {
     async webhook(@Body() body: any): Promise<void> {
         console.log('Imagen recibida:', body.output[0]);
         const imagePath = await this.imageSDservice.saveImage( body.output[0]);
-        const videoUrl = await this.imageSDservice.generateZoomVideo(imagePath, this.videoTime);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(imagePath, 5);
         console.log('Video URL:', videoUrl);
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
         this.eventEmitter.emit('imageReceived', videoUrl);
