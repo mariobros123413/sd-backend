@@ -99,9 +99,8 @@ export class ImageSdService {
 
     const zoomFactor = 1.5; // Factor de zoom máximo
     const framesPerSecond = 30; // Ajusta según tu preferencia
-    // console.log(`ffmpegInstaller.path :${ffmpegInstaller.path}`)
     const command = ffmpeg()
-      .setFfmpegPath(ffmpegInstaller.path)
+      .setFfmpegPath('src/ffmpeg/ffmpeg.exe')
       .input(imageUrl)
       .inputOptions(['-loop 1'])
       .outputOptions([
