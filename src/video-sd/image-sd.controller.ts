@@ -34,7 +34,7 @@ export class ImageSdController {
     async webhook(@Body() body: any): Promise<void> {
         console.log('Imagen recibida:', body.output[0]);
         const imagePath = await this.imageSDservice.saveImage(body.output[0]);
-        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, this.videoTime);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, 4);
 
         // Eliminar el segmento no válido de la URL
         const relativeImagePath = imagePath.replace('src/', '');
