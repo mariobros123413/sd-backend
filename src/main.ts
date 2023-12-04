@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { join } from 'path'; // Importa la función 'join' de Node.js para trabajar con rutas
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
