@@ -29,16 +29,23 @@ export class ImageSdController {
         }
     }
 
-    // Nuevo endpoint para el webhook
+    //recibe una imagen url 
     @Post('/webhook')
     async webhook(@Body() body: any): Promise<void> {
         console.log('Imagen recibida:', body.output[0]);
-        const imagePath = await this.imageSDservice.saveImage( body.output[0]);
-        const videoUrl = await this.imageSDservice.generateZoomVideo(imagePath, 5);
-        console.log('Video URL:', videoUrl);
+        const imagePath = await this.imageSDservice.saveImage(body.output[0]);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, this.videoTime);
+
+        // Eliminar el segmento no válido de la URL
+        const relativeImagePath = imagePath.replace('src/', '');
+        const relativeVideoUrl = videoUrl.replace('src/', '');
+
+        console.log('Video URL:', `${process.env.URL_BACKEND}/${videoUrl}`);
+
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
-        this.eventEmitter.emit('imageReceived', videoUrl);
+        this.eventEmitter.emit('imageReceived', `${process.env.URL_BACKEND}/${videoUrl}`);
     }
+
 
     // Endpoint para el cliente que quiere suscribirse a eventos SSE
     @Get('/sse')

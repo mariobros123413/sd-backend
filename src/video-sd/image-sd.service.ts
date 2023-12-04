@@ -33,7 +33,7 @@ export class ImageSdService {
 
     const apiUrl = 'https://stablediffusionapi.com/api/v4/dreambooth';
     const requestData = {
-      key: "rosqbr4dkbnIdOwXNZEeHrXknYNwAZzRrsfjaICwKBDRxhhRuRmbbfZhwEeM",
+      key: "odcJ7nLUhMg8SHL4f4Hi36zmeWNtVEW0ttg3r7ng2TP58eNQ61l0Zism2q3k",
       model_id: 'drood-disney-pixar',
       prompt: `${body.text} ${additionalPrompt}`,
       negative_prompt: '(child:1.5), ((((underage)))), ((((child)))), (((kid))), (((preteen))), (teen:1.5) ugly, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, bad anatomy, watermark, signature, cut off, low contrast, underexposed, overexposed, bad art, beginner, amateur, distorted face, blurry, draft, grainy',
@@ -66,7 +66,7 @@ export class ImageSdService {
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     var raw = JSON.stringify({
-      "key": "rosqbr4dkbnIdOwXNZEeHrXknYNwAZzRrsfjaICwKBDRxhhRuRmbbfZhwEeM",
+      "key": "odcJ7nLUhMg8SHL4f4Hi36zmeWNtVEW0ttg3r7ng2TP58eNQ61l0Zism2q3k",
       "request_id": `"${id}"`
     });
     var requestOptions = {
@@ -86,17 +86,13 @@ export class ImageSdService {
   }
 
   async generateZoomVideo(imageUrl: string, zoomDuration: number): Promise<string> {
-    const userId = 'nickusuario'; // Obtén el ID del usuario de tu lógica de aplicación
-    const projectId = 'idproject'; // Obtén el ID del proyecto de tu lógica de aplicación
+    console.log(`url imagen : ${imageUrl}`)
+    const userId = 'nickusuario';
+    const projectId = 'idproject';
     const imageExtension = path.extname(imageUrl);
-    console.log(`imaext :${imageExtension}`);
     const imageName = path.basename(imageUrl, imageExtension);
-    console.log(`imageName :${imageName}`);
-
-    const projectRoot = process.cwd();
-    await fs.ensureDir(`src/videos/${userId}/${projectId}`);
-
-    const outputVideoPath = path.join(projectRoot, `src/videos/${userId}/${projectId}/${imageName}.mp4`);
+    const relativePath = `videos/${userId}/${projectId}/${imageName}_zoomed.mp4`;
+    const outputVideoPath = path.join(process.cwd(), `src/${relativePath}`);
     console.log(`path ${outputVideoPath}`);
 
     const zoomFactor = 1.5; // Factor de zoom máximo
@@ -108,8 +104,8 @@ export class ImageSdService {
       .inputOptions(['-loop 1'])
       .outputOptions([
         '-c:v libx264',
-        '-vf', `zoompan=z='min(zoom+0.0015\\,${zoomFactor})':d=${3 * framesPerSecond}:fps=${framesPerSecond},scale=512:512,format=yuv420p`,
-        '-t', `3`,
+        '-vf', `zoompan=z='min(zoom+0.0015\\,${zoomFactor})':d=${zoomDuration * framesPerSecond}:fps=${framesPerSecond},scale=512:512,format=yuv420p`,
+        '-t', `${zoomDuration}`,
         '-pix_fmt', 'yuv420p'
       ])
       .on('end', () => {
@@ -123,21 +119,27 @@ export class ImageSdService {
       command.on('end', resolve).on('error', reject);
     });
 
-    return `${outputVideoPath}`;
+    return relativePath;
   }
 
+
   async saveImage(imageUrl: string): Promise<string> {
-    const userId = 'nickusuario'; // Obtén el ID del usuario de tu lógica de aplicación
-    const projectId = 'idproject'; // Obtén el ID del proyecto de tu lógica de aplicación
+    const userId = 'nickusuario';
+    const projectId = 'idproject';
     const imageName = `${userId}-${projectId}-${Date.now()}.png`;
-    const imagePath = `src/images/${userId}/${projectId}/${imageName}`;
+
+    const imagePathRelative = `images/${userId}/${projectId}/${imageName}`;
+    const imagePathFull = `src/${imagePathRelative}`;
 
     await fs.ensureDir(`src/images/${userId}/${projectId}`);
 
     const response = await fetch(imageUrl);
     const imageBuffer = await response.buffer();
-    await fs.writeFile(imagePath, imageBuffer);
+    await fs.writeFile(imagePathFull, imageBuffer);
 
-    return imagePath;
+    return imagePathRelative;
   }
+
+
+
 }
