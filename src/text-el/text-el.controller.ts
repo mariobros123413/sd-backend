@@ -1,50 +1,65 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Controller, Post, Body, Get, NotFoundException, Response } from '@nestjs/common';
 import { TextElService } from './text-el.service';
-import * as fs from 'fs';
-import fetch from 'node-fetch';
-import { promisify } from 'util';
-const pipeline = promisify(require('stream').pipeline);
-const CHUNK_SIZE = 1024;
+import { EventEmitter2 } from '@nestjs/event-emitter';
 @Controller('text-el')
 export class TextElController {
-    private readonly API_KEY = 'bb20c1df6a05471871d75dbf8b376900'; // Reemplaza esto con tu clave de API de Stable Diffusion
-    private readonly API_URL = 'https://api.elevenlabs.io/v1/text-to-speech/';
-    constructor(private readonly textElService: TextElService) { }
+    private readonly subscriptions: any[] = []; // Almacena las suscripciones
+    constructor(private readonly textElService: TextElService, private readonly eventEmitter: EventEmitter2,
+    ) { }
 
     @Post()
-    async createNarracion(@Body() body: any): Promise<string> {
-        const cuerpo = JSON.stringify({
-            "text": `${body.text}`,
-            "model_id": `${body.model}`,
-            "voice_settings": {
-                "stability": `${body.stability}`,
-                "similarity_boost": `${body.boost}`
-            }
-        });
-        console.log("cuerpot", cuerpo)
-        const urlId = `${this.API_URL}${body.voiceid}`;
-        console.log("urlID", urlId);
+    async createNarracion(@Body() body: any) {
+        try {
+            const voiceurl = await this.textElService.genVoice(body);
+            console.log('VOICE URL:', `${process.env.URL_BACKEND}/${voiceurl}`);
 
-        const response = await fetch(urlId, {
-            method: 'POST',
-            headers: {
-                "Accept": "audio/mpeg",
-                "Content-Type": "application/json",
-                "xi-api-key": this.API_KEY
-            },
-            body: cuerpo
-        });
-        if (response.status !== 200) {
-            throw new Error(`Error al solicitar el audio. Código de estado: ${response.status}`);
+            // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
+            this.eventEmitter.emit('voicereceived', `${process.env.URL_BACKEND}/${voiceurl}`);
+        } catch (error) {
+            throw new NotFoundException(`Error al crearNarracion Backend: ${error}.`);
         }
+    }
 
-        const outputFile = 'output.mp3';
-        const fileStream = fs.createWriteStream(outputFile, { encoding: 'binary' });
+    @Get('/sse')
+    async sse(@Response() res: any): Promise<void> {
+        console.log("Conexión SSEV establecida");
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
 
-        await pipeline(response.body, fileStream);
+        // Manejar cierre de conexión
+        res.on('close', () => {
+            console.log("Conexión SSE cerrada");
+            // Desuscribir todos los eventos al cerrar la conexión
+            this.subscriptions.forEach(subscription => {
+                this.eventEmitter.removeListener(subscription.event, subscription.listener);
+            });
+        });
 
-        console.log('Audio descargado y guardado en', outputFile);
+        // Suscribir al evento 'voicereceived' y enviar datos al cliente cuando ocurra
+        const onData = (data: any) => {
+            res.write(`data: ${(data)}\n\n`);
+        };
 
-        return 'Audio descargado y guardado en ' + outputFile;
+        const subscription = this.eventEmitter.on('voicereceived', onData);
+
+        // Almacenar la suscripción para desuscribirse más tarde
+        this.subscriptions.push({
+            event: 'voicereceived',
+            listener: onData,
+        });
+
+        // Emitir un mensaje inicial
+        res.write(`data: Conexión SSEV establecida\n\n`);
+
+        // Mantener la conexión abierta
+
+        // Limpiar intervalos y suscripciones cuando se cierre la conexión
+        res.on('close', () => {
+            console.log("Conexión SSE cerrada");
+            this.subscriptions.forEach(subscription => {
+                this.eventEmitter.removeListener(subscription.event, subscription.listener);
+            });
+        });
     }
 }

@@ -20,6 +20,10 @@ import { join } from 'path'; // Importa la función 'join' de Node.js para traba
       rootPath: join(__dirname, '..', 'videos'), // Ruta a tu carpeta 'public'
       serveRoot: '/videos', // Ruta base para servir los archivos estáticos
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'voices'), // Ruta a tu carpeta 'public'
+      serveRoot: '/voices', // Ruta base para servir los archivos estáticos
+    }),
     ImageSdModule,
     TextElModule,
     DiscordModule,
