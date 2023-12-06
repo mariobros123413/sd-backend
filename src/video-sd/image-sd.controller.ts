@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Response, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ImageSdService } from './image-sd.service';
+import { TextElService } from 'src/text-el/text-el.service';
 
 interface Subscription {
     event: string;
@@ -9,19 +10,20 @@ interface Subscription {
 @Controller('image-sd')
 export class ImageSdController {
     private readonly subscriptions: any[] = []; // Almacena las suscripciones
-    private videoTime: number; // Variable para almacenar el tiempo del video
-
+    private textVoice: string;
+    private modelSelect: string;
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly imageSDservice: ImageSdService,
+        private readonly textElService: TextElService,
     ) { }
 
     @Post()
     async createVideo(@Body() body: any): Promise<any> {
         try {
-            this.videoTime = body.videoTime; // Almacenar el tiempo del video
-            console.log(` video create time : ${body}`);
-
+            console.log(` video create time : ${JSON.stringify(body)}`);
+            this.textVoice = body.textVoice;
+            this.modelSelect = body.modelSelect;
             const imageUrl = await this.imageSDservice.genImage(body);
             return 'Solicitud en proceso. Esperando la disponibilidad de la imagen...';
         } catch (error) {
@@ -34,12 +36,15 @@ export class ImageSdController {
     async webhook(@Body() body: any): Promise<void> {
         console.log('Imagen recibida:', body.output[0]);
         const imagePath = await this.imageSDservice.saveImage(body.output[0]);
-        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, 4);
+        // const voice = await this.textElService.genVoice("Este es un breve cuento de prueba", "Adam");
+        const voice = await this.textElService.genVoice(this.textVoice, this.modelSelect);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, voice.estimatedDurationSeconds);
 
-        console.log('Video URL:', `${process.env.URL_BACKEND}/${videoUrl}`);
+        const videoUnidoUrl = await this.imageSDservice.genVideoAudio(videoUrl, voice.audioPathRelative)
+        console.log('Video URL:', `${process.env.URL_BACKEND}/${videoUnidoUrl}`);
 
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
-        this.eventEmitter.emit('imageReceived', `${process.env.URL_BACKEND}/${videoUrl}`);
+        this.eventEmitter.emit('imageReceived', `${process.env.URL_BACKEND}/${videoUnidoUrl}`);
     }
 
 

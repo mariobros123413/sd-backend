@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ImageSdModule } from './video-sd/image-sd.module';
 import { TextElController } from './text-el/text-el.controller';
-import { TextElModule } from './text-el/text-el.module';
+import { TextSdModule } from './text-el/text-el.module';
 import { DiscordModule } from './discord/discord.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -24,13 +24,17 @@ import { join } from 'path'; // Importa la función 'join' de Node.js para traba
       rootPath: join(__dirname, '..', 'voices'), // Ruta a tu carpeta 'public'
       serveRoot: '/voices', // Ruta base para servir los archivos estáticos
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'content'), // Ruta a tu carpeta 'public'
+      serveRoot: '/content', // Ruta base para servir los archivos estáticos
+    }),
     ImageSdModule,
-    TextElModule,
+    TextSdModule,
     DiscordModule,
     ConfigModule.forRoot(),
     EventEmitterModule.forRoot(),
   ],
-  controllers: [AppController, TextElController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }

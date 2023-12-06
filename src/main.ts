@@ -18,6 +18,7 @@ async function bootstrap() {
   app.use('/images', express.static(join(__dirname, '..', 'images')));
   app.use('/videos', express.static(join(__dirname, '..', 'videos')));
   app.use('/voices', express.static(join(__dirname, '..', 'voices')));
+  app.use('/content', express.static(join(__dirname, '..', 'content')));
 
   await app.listen(process.env.PORT || 3001);
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import * as fs from 'fs-extra'; // Importa fs-extra
 import fetch from 'node-fetch';
 import axios from 'axios';
@@ -10,6 +10,7 @@ import path from 'path';
 var request = require('request');
 @Injectable()
 export class ImageSdService {
+
   async downloadAndSaveVideo(videoUrl: string): Promise<void> {
     console.log('vamos a descargar')
     const response = await fetch(videoUrl, {
@@ -140,7 +141,34 @@ export class ImageSdService {
 
     return imagePathRelative;
   }
+  async genVideoAudio(videoUrl: string, voiceUrl: string) {
+    const userId = 'nickusuario';
+    const projectId = 'idproject';
+    const imageExtension = path.extname(voiceUrl);
+    const imageName = path.basename(voiceUrl, imageExtension);
+    await fs.ensureDir(`content/${userId}/${projectId}`);
 
+    const relativePath = `${userId}/${projectId}/${imageName}_content.mp4`;
+    const outputVideoPath = path.join('content', `${relativePath}`); // Usa __dirname
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg()
+        .setFfmpegPath(path.join('src/ffmpeg/ffmpeg.exe'))
+        .input(videoUrl)
+        .input(voiceUrl)
+        .output(outputVideoPath)
+        .on('end', () => {
+          console.log('Unión de video y audio completa');
+          resolve();
+        })
+        .on('error', (err) => {
+          console.error('Error en la unión de video y audio:', err);
+          reject(err);
+        })
+        .run();
+    });
+
+    return outputVideoPath;
+  }
 
 
 }
