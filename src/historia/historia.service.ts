@@ -5,12 +5,21 @@ import ffmpeg from 'fluent-ffmpeg';
 import ffprobe from '@ffprobe-installer/ffprobe';
 import * as ffmpegg from 'fluent-ffmpeg';
 import * as fse from 'fs-extra';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Historia } from 'src/entity/historia.entity';
+import { Repository } from 'typeorm';
+import { Usuario } from 'src/entity/usuario.entity';
 
 
 @Injectable()
 export class HistoriaService {
     private historias: Record<string, string[]> = {};
-
+    constructor(
+        @InjectRepository(Usuario)
+        private usuarioRepository: Repository<Usuario>,
+        @InjectRepository(Historia)
+        private historiaRepository: Repository<Historia>,
+    ) { }
     async agregarVideo(username: string, historia: string, videoUrl: string): Promise<void> {
         const key = `${username}_${historia}`;
 
@@ -51,7 +60,10 @@ export class HistoriaService {
         // Lógica para combinar los videos
         const outputPath = await this.combinarVideos(videoUrls, historiaFilePath);
         console.log(`outputPath : ${JSON.stringify(outputPath)}`);
-
+        // Guardar en la base de datos
+        const historiaC = await this.historiaRepository.findOne({ where: { titulo: historia } });
+        historiaC.url = `${process.env.URL_BACKEND}/contents/${username}/${historia}/historia.mp4`;
+        await this.historiaRepository.save(historiaC);
         return historiaFilePath;
     }
 
@@ -59,6 +71,11 @@ export class HistoriaService {
         const carpetaHistoria = join('content', username, historia);
 
         try {
+            const user = await this.usuarioRepository.findOne({ where: { nombre: username } });
+            const historiac = new Historia();
+            historiac.titulo = historia;
+            historiac.idusuario = user.id;
+            await this.historiaRepository.save(historiac);
             // Crear la carpeta de la historia si no existe
             await fs.mkdir(carpetaHistoria, { recursive: true });
         } catch (error) {

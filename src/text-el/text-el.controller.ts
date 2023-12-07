@@ -10,7 +10,7 @@ export class TextElController {
     @Post()
     async createNarracion(@Body() body: any) {
         try {
-            const voiceurl = await this.textElService.genVoice(body.textVoice, body.modelSelect);
+            const voiceurl = await this.textElService.genVoice(body.textVoice, body.modelSelect, body.usuario, body.historia);
             console.log('VOICE URL:', `${process.env.URL_BACKEND}/${voiceurl}`);
 
             // Puedes emitir un evento o realizar acciones adicionales según tus necesidades

@@ -8,7 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Video } from 'src/entity/video.entity';
 import { Historia } from 'src/entity/historia.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([Video, Historia]),TextSdModule],
+  imports: [TypeOrmModule.forFeature([Video, Historia, Video]),TextSdModule],
   controllers: [ImageSdController],
   providers: [ImageSdService, EventEmitter2, TextElService],
   exports: [ImageSdService]

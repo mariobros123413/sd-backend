@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import * as fs from 'fs-extra'; // Importa fs-extra
 import fetch from 'node-fetch';
 import axios from 'axios';
@@ -6,11 +6,23 @@ import { exec } from 'child_process';
 import ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
 import path from 'path';
+import { Video } from 'src/entity/video.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Historia } from 'src/entity/historia.entity';
+import { Usuario } from 'src/entity/usuario.entity';
 
 var request = require('request');
 @Injectable()
 export class ImageSdService {
-
+  constructor(
+    @InjectRepository(Video)
+    private videoRepository: Repository<Video>,
+    @InjectRepository(Historia)
+    private historiaRepository: Repository<Historia>,
+    @InjectRepository(Usuario)
+    private usuarioRepository: Repository<Usuario>,
+  ) { }
   async downloadAndSaveVideo(videoUrl: string): Promise<void> {
     console.log('vamos a descargar')
     const response = await fetch(videoUrl, {
@@ -86,10 +98,10 @@ export class ImageSdService {
     return response.data.output;
   }
 
-  async generateZoomVideo(imageUrl: string, zoomDuration: number): Promise<string> {
+  async generateZoomVideo(imageUrl: string, zoomDuration: number, usuario: string, historia: string): Promise<string> {
     console.log(`url imagen : ${imageUrl}`)
-    const userId = 'nickusuario';
-    const projectId = 'idproject';
+    const userId = usuario;
+    const projectId = historia;
     const imageExtension = path.extname(imageUrl);
     const imageName = path.basename(imageUrl, imageExtension);
     await fs.ensureDir(`videos/${userId}/${projectId}`);
@@ -120,14 +132,13 @@ export class ImageSdService {
     await new Promise<void>((resolve, reject) => {
       command.on('end', resolve).on('error', reject);
     });
-
     return `videos/${relativePath}`;
   }
 
 
-  async saveImage(imageUrl: string): Promise<string> {
-    const userId = 'nickusuario';
-    const projectId = 'idproject';
+  async saveImage(imageUrl: string, usuario: string, historia: string): Promise<string> {
+    const userId = usuario;
+    const projectId = historia;
     const imageName = `${userId}-${projectId}-${Date.now()}.png`;
 
     const imagePathRelative = `images/${userId}/${projectId}/${imageName}`;
@@ -141,9 +152,9 @@ export class ImageSdService {
 
     return imagePathRelative;
   }
-  async genVideoAudio(videoUrl: string, voiceUrl: string) {
-    const userId = 'nickusuario';
-    const projectId = 'idproject';
+  async genVideoAudio(videoUrl: string, voiceUrl: string, usuario: string, historia: string) {
+    const userId = usuario;
+    const projectId = historia;
     const imageExtension = path.extname(voiceUrl);
     const imageName = path.basename(voiceUrl, imageExtension);
     await fs.ensureDir(`content/${userId}/${projectId}`);
@@ -169,6 +180,29 @@ export class ImageSdService {
 
     return outputVideoPath;
   }
+  async guardarVideoDB(textVoice: string, prompt: string, modelSelect: string, url: string, historia: string) {
+    try {
+      const historiac = await this.historiaRepository.findOne({ where: { titulo: historia } });
+      const videoc = new Video();
+      videoc.narracion = textVoice;
+      videoc.descripcion = prompt;
+      videoc.narrador = modelSelect;
+      videoc.url = url;
+      videoc.idhistoria = historiac.id;
+      this.videoRepository.save(historiac);
+    } catch (error) {
+      throw new NotFoundException(`Error al guardar video. : ${error}`);
 
+    }
+  }
+
+  async getVideos(idhistoria: any) {
+    try {
+      const videos = await this.videoRepository.find({ where: { idhistoria: idhistoria } });
+      return videos;
+    } catch (error) {
+      throw new NotFoundException(`Error al getVideos de ${idhistoria} : ${error}`);
+    }
+  }
 
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Response, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Response, NotFoundException, Param } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ImageSdService } from './image-sd.service';
 import { TextElService } from 'src/text-el/text-el.service';
@@ -12,6 +12,8 @@ export class ImageSdController {
     private readonly subscriptions: any[] = []; // Almacena las suscripciones
     private textVoice: string;
     private modelSelect: string;
+    private usuario: string;
+    private historia: string;
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly imageSDservice: ImageSdService,
@@ -24,6 +26,8 @@ export class ImageSdController {
             console.log(` video create time : ${JSON.stringify(body)}`);
             this.textVoice = body.textVoice;
             this.modelSelect = body.modelSelect;
+            this.usuario = body.usuario;
+            this.historia = body.historia;
             const imageUrl = await this.imageSDservice.genImage(body);
             return 'Solicitud en proceso. Esperando la disponibilidad de la imagen...';
         } catch (error) {
@@ -35,14 +39,14 @@ export class ImageSdController {
     @Post('/webhook')
     async webhook(@Body() body: any): Promise<void> {
         console.log('Imagen recibida:', body.output[0]);
-        const imagePath = await this.imageSDservice.saveImage(body.output[0]);
+        const imagePath = await this.imageSDservice.saveImage(body.output[0], this.usuario, this.historia);
         // const voice = await this.textElService.genVoice("Este es un breve cuento de prueba", "Adam");
-        const voice = await this.textElService.genVoice(this.textVoice, this.modelSelect);
-        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, voice.estimatedDurationSeconds);
+        const voice = await this.textElService.genVoice(this.textVoice, this.modelSelect, this.usuario, this.historia);
+        const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, voice.estimatedDurationSeconds, this.usuario, this.historia);
 
-        const videoUnidoUrl = await this.imageSDservice.genVideoAudio(videoUrl, voice.audioPathRelative) //unido voz y video
+        const videoUnidoUrl = await this.imageSDservice.genVideoAudio(videoUrl, voice.audioPathRelative, this.usuario, this.historia) //unido voz y video
         console.log('Video URL:', `${process.env.URL_BACKEND}/${videoUnidoUrl}`);
-
+        const guardarVideo = await this.imageSDservice.guardarVideoDB(this.textVoice, body.prompt, this.modelSelect, `${process.env.URL_BACKEND}/${videoUnidoUrl}`, this.historia);
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
         this.eventEmitter.emit('imageReceived', `${process.env.URL_BACKEND}/${videoUnidoUrl}`);
     }
@@ -90,5 +94,15 @@ export class ImageSdController {
                 this.eventEmitter.removeListener(subscription.event, subscription.listener);
             });
         });
+    }
+
+    @Get('videos/:idhistoria')
+    async getVideos(@Param('idhistoria') idhistoria: any) {
+        try {
+            const videos = await this.imageSDservice.getVideos(idhistoria);
+            return videos;
+        } catch (error) {
+            throw new NotFoundException(`Error al getVideos Backend: ${error}.`);
+        }
     }
 }

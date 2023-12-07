@@ -13,10 +13,7 @@ export class Historia {
     @Column({ name: "url", type: "varchar", nullable: true })
     url: string;
 
-    @ManyToOne(() => Usuario, usuario => usuario.historias, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idusuario' }) // Especifica el nombre de la columna en la tabla 'evento'
-    usuario: Usuario;
+    @Column({ name: "idusuario", type: "int", nullable: true })
+    idusuario: number;
 
-    @OneToMany(() => Video, video => video.historia)
-    videos: Video[];
 }

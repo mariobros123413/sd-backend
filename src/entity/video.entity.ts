@@ -19,8 +19,7 @@ export class Video {
     @Column({ name: "url", type: "varchar", nullable: true })
     url: string;
 
-    @ManyToOne(() => Historia, historia => historia.videos, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'idhistoria' }) // Especifica el nombre de la columna en la tabla 'evento'
-    historia: Historia;
+    @Column({ name: "idhistoria", type: "int", nullable: true })
+    idhistoria: number;
     
 }

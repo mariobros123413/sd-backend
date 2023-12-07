@@ -18,6 +18,4 @@ export class Usuario {
     @Column({ name: "saldo", type: "int", nullable: true })
     saldo: number;
 
-    @OneToMany(() => Historia, historia => historia.usuario)
-    historias: Historia[];
 }

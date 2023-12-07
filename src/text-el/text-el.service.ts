@@ -26,7 +26,7 @@ export class TextElService {
     }
   }
 
-  async genVoice(textVoice: any, modelSelect: string) {
+  async genVoice(textVoice: any, modelSelect: string, usuario: string, historia: string) {
     try {
       const modelId = modelSelect === 'Adam' ? 'eleven_multilingual_v2' : 'eleven_multilingual_v1';
       const stability = modelSelect === 'Adam' ? 0.84 : 0.50;
@@ -61,8 +61,8 @@ export class TextElService {
         throw new Error(`Error al solicitar el audio. Código de estado: ${response.status}`);
       }
       console.log(`response: ${JSON.stringify(response)}`);
-      const userId = 'nickusuario';
-      const projectId = 'idproject';
+      const userId = usuario;
+      const projectId = historia;
       const audioName = `${userId}-${projectId}-${Date.now()}.mp3`;
 
       const audioPathRelative = path.join('voices', userId, projectId, audioName);
