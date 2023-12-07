@@ -7,8 +7,10 @@ import { TextElService } from 'src/text-el/text-el.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Video } from 'src/entity/video.entity';
 import { Historia } from 'src/entity/historia.entity';
+import { UsuarioModule } from 'src/usuario/usuario.module';
+import { Usuario } from 'src/entity/usuario.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([Video, Historia, Video]),TextSdModule],
+  imports: [TypeOrmModule.forFeature([Usuario, Historia, Video]),TextSdModule, UsuarioModule],
   controllers: [ImageSdController],
   providers: [ImageSdService, EventEmitter2, TextElService],
   exports: [ImageSdService]
