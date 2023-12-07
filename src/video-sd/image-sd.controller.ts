@@ -40,7 +40,7 @@ export class ImageSdController {
         const voice = await this.textElService.genVoice(this.textVoice, this.modelSelect);
         const videoUrl = await this.imageSDservice.generateZoomVideo(`${process.env.URL_BACKEND}/${imagePath}`, voice.estimatedDurationSeconds);
 
-        const videoUnidoUrl = await this.imageSDservice.genVideoAudio(videoUrl, voice.audioPathRelative)
+        const videoUnidoUrl = await this.imageSDservice.genVideoAudio(videoUrl, voice.audioPathRelative) //unido voz y video
         console.log('Video URL:', `${process.env.URL_BACKEND}/${videoUnidoUrl}`);
 
         // Puedes emitir un evento o realizar acciones adicionales según tus necesidades
